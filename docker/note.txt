@@ -1,0 +1,134 @@
+cd 'E:\MayAo\Project\WebCoreJava\WebCore.SpringApi'
+
+# JAVA
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-21.0.12.1'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+
+# WEBCORE
+$env:WEBCORE_CORELOCALHOST_IP = '172.68.68.87'
+$env:WEBCORE_LDAP_HOST_IP = '172.68.68.87'
+$env:WEBCORE_LDAPS_CERT_HOST_PATH = 'E:\MayAo\Project\WebCoreJava\WebCore.SpringApi\certs\dc1-ad-pbb-ca.cer'
+
+$env:WEBCORE_CLUSTER_ENABLED = 'false'
+$env:WEBCORE_SERVER_PORT = '51130'
+$env:WEBCORE_OAUTH_ISSUER = 'http://localhost:51130'
+
+# DATABASE
+$env:WEBCORE_DATABASE_PROVIDER = 'POSTGRES'
+$env:WEBCORE_DATABASE_CONNECTION_STRING = 'Host=corelocalhostdb;Port=5432;Database=web_core;Username=app_user;Password=123456a@;Search Path=core,public;Timeout=120;Command Timeout=120;Pooling=true;'
+
+# CORS
+$env:WEBCORE_CORS_ALLOWED_ORIGINS = 'http://localhost:3001,http://localhost:3005,http://localhost:5173'
+
+# COOKIE
+$env:WEBCORE_AUTH_COOKIE_SECURE = 'false'
+$env:WEBCORE_AUTH_COOKIE_SAME_SITE = 'Lax'
+
+# LOKI
+$env:WEBCORE_LOKI_ENABLED = 'true'
+$env:WEBCORE_LOKI_ENDPOINT = 'http://corelocalhost:3100/loki/api/v1/push'
+$env:WEBCORE_LOKI_SERVICE = 'webcore-spring-api'
+$env:WEBCORE_LOKI_ENVIRONMENT = 'development'
+
+# PROMETHEUS
+$env:WEBCORE_PROMETHEUS_PUBLIC = 'true'
+
+# HEALTH
+$env:MANAGEMENT_HEALTH_MAIL_ENABLED = 'false'
+
+# LDAP
+$env:WEBCORE_LDAP_HOSTNAME = 'dc1.ad.pbb.local'
+$env:WEBCORE_DOMAIN_SERVICE_USERNAME = 'webcore-ldap-reader@ad.pbb.local'
+$env:WEBCORE_DOMAIN_SERVICE_PASSWORD = '123456a@'
+$env:WEBCORE_DOMAIN_BASE_DN = 'DC=ad,DC=pbb,DC=local'
+
+# LOGGING
+$env:LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY = 'TRACE'
+
+# CLAMAV
+$env:WEBCORE_DMS_CLAMAV_HOST = 'corelocalhost'
+$env:WEBCORE_DMS_CLAMAV_PORT = '3310'
+
+# REDIS
+$env:WEBCORE_REDIS_HOST = 'corelocalhost'
+$env:WEBCORE_REDIS_PORT = '6379'
+
+# NOTIFICATION
+$env:WEBCORE_NOTIFICATION_REALTIME_ENABLED = 'true'
+$env:WEBCORE_NOTIFICATION_REDIS_CHANNEL = 'webcore:notification:events'
+
+# UPLOAD FILE
+$env:SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE = '20MB'
+$env:SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE = '20MB'
+
+
+mvn spring-boot:run
+
+cd E:\MayAo\Project\WebCoreJava\WebCore.ClientNew
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+pnpm install
+pnpm build      # build thư viện @adminlte/react vào dist/
+pnpm cbs        # chạy app Next.js cbs ở http://localhost:3001
+
+
+cd E:\MayAo\Project\WebCoreJava\WebCore.ClientNew
+$env:WEBCORE_API_URL = 'http://localhost:51130'
+$env:NEXT_PUBLIC_WEBCORE_WS_URL = ''
+pnpm cbs
+
+
+#### set file host
+172.68.68.87	corelocalhostdb
+172.68.68.87	corelocalhost
+172.68.68.87	dc1.ad.pbb.local
+172.68.68.87	corelocalhosts3
+
+############## cer
+$kt = 'C:\Program Files\Java\jdk-21.0.12.1\bin\keytool.exe'
+$cer = 'E:\MayAo\Project\WebCoreJava\WebCore.SpringApi\certs\dc1-ad-pbb-ca.cer'
+
+& $kt -list -cacerts -storepass changeit -alias dc1-ad-pbb-ca *> $null
+if ($LASTEXITCODE -eq 0) {
+    & $kt -delete -cacerts -storepass changeit -alias dc1-ad-pbb-ca
+    'Da xoa alias cu dc1-ad-pbb-ca'
+}
+
+& $kt -importcert -noprompt -cacerts -storepass changeit -alias dc1-ad-pbb-ca -file $cer
+& $kt -list -cacerts -storepass changeit -alias dc1-ad-pbb-ca
+
+
+teller-hcm001
+officer-hcm001
+ho-reviewer
+docsvc-admin
+webcore-ldap-reader
+
+
+### docker
+cd E:\MayAo\Project\WebCoreJava\docker
+$env:NEXT_PUBLIC_WEBCORE_WS_URL = ''
+docker compose -f docker-compose.client-new.yml build --no-cache
+docker compose -f docker-compose.spring-api.yml build
+
+docker save -o webcore-client-new.local.tar webcore-client-new:local
+docker save -o webcore-spring-api.local.tar webcore-spring-api:local
+
+######## import
+sudo ctr -n k8s.io images import /root/images/webcore-client-new.local.tar
+sudo ctr -n k8s.io images import /root/images/webcore-spring-api.local.tar
+
+
+############# 1. Dừng toàn bộ Backend và Frontend
+kubectl scale deployment/webcore-backend --replicas=0 -n webcore
+kubectl scale deployment/webcore-frontend --replicas=0 -n webcore
+
+############# Nếu trước đó mỗi Deployment chạy 2 replicas:
+kubectl scale deployment/webcore-backend --replicas=2 -n webcore
+kubectl scale deployment/webcore-frontend --replicas=2 -n webcore
+
+#### apply config
+kubectl apply -f /root/webcore-k8s/backend-deployment.yaml
+kubectl rollout restart deployment/webcore-backend -n webcore
+kubectl rollout status deployment/webcore-backend -n webcore
+kubectl rollout restart deployment/webcore-frontend -n webcore
+kubectl rollout status deployment/webcore-frontend -n webcore

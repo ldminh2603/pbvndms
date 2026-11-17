@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webcore-backend-config
+  namespace: webcore
+data:
+  WEBCORE_CORELOCALHOST_IP: "172.68.68.87"
+  MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+  SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: "20MB"
+  SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: "20MB"
+  WEBCORE_SERVER_PORT: "8080"
+  WEBCORE_CLUSTER_ENABLED: "true"
+  WEBCORE_DATABASE_PROVIDER: "POSTGRES"
+  WEBCORE_REDIS_HOST: "172.68.68.87"
+  WEBCORE_REDIS_PORT: "6379"
+  WEBCORE_NOTIFICATION_REALTIME_ENABLED: "true"
+  WEBCORE_NOTIFICATION_REDIS_CHANNEL: "webcore:notification:events"
+  WEBCORE_CORS_ALLOWED_ORIGINS: "http://172.68.68.83,https://172.68.68.83,http://localhost:3001,http://minhcurly.ddnsfree.com,https://minhcurly.ddnsfree.com,http://172.68.69.171:3002,http://localhost:3001,http://localhost:3005,http://localhost:5173,http://172.68.68.83"
+  WEBCORE_AUTH_COOKIE_SECURE: "false"
+  WEBCORE_AUTH_COOKIE_SAME_SITE: "Lax"
+  WEBCORE_OAUTH_ISSUER: "http://localhost:51130"
+  WEBCORE_DMS_CLAMAV_HOST: "172.68.68.87"
+  WEBCORE_DMS_CLAMAV_PORT: "3310"
+  WEBCORE_DMS_QUARANTINE_BUCKET: "pbbdms-quarantine"
+  WEBCORE_DMS_DOCUMENT_BUCKET: "pbb-dms-worm"
+  #WEBCORE_LDAP_HOST_IP: "172.68.68.94"
+  #WEBCORE_LDAP_HOSTNAME: "dc01.ad.pbb.local"
+  WEBCORE_DOMAIN_SERVICE_USERNAME: "webcore-ldap-reader@ad.pbb.local"
+  WEBCORE_DOMAIN_BASE_DN: "DC=ad,DC=pbb,DC=local"
+  WEBCORE_LOKI_ENABLED: "true"
+  WEBCORE_LOKI_ENDPOINT: "http://172.68.68.87:3100/loki/api/v1/push"
+  WEBCORE_LOKI_SERVICE: "webcore-spring-api"
+  WEBCORE_LOKI_ENVIRONMENT: "development"
+  WEBCORE_PROMETHEUS_PUBLIC: "true"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "TRACE"
+  WEBCORE_LDAPS_CERT_HOST_PATH: "/app/certs/dc01-ad-pbb-local.cer"

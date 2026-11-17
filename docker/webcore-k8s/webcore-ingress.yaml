@@ -1,0 +1,52 @@
+# /root/webcore-k8s/webcore-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webcore-ingress
+  namespace: webcore
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - minhcurly.ddnsfree.com
+      secretName: webcore-tls
+  rules:
+    # Không d?t host d? v?n truy c?p n?i b? b?ng HTTP theo IP du?c.
+    - http:
+        paths:
+          # Next.js xu ly API proxy
+          - path: /api/webcore
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+          - path: /api/webcore-api
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+          # Spring API, bao gom WebSocket /api/notification/ws
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 80
+
+          # Giao dien Next.js
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80

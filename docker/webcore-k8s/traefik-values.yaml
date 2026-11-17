@@ -1,0 +1,35 @@
+deployment:
+  replicas: 2
+
+nodeSelector:
+  ingress-node: "true"
+
+service:
+  type: LoadBalancer
+  annotations:
+    metallb.io/address-pool: webcore-pool
+  spec:
+    loadBalancerIP: 172.68.68.83
+    externalTrafficPolicy: Cluster
+
+ingressClass:
+  enabled: true
+  name: traefik
+
+providers:
+  kubernetesIngress:
+    enabled: true
+
+ports:
+  web:
+    exposedPort: 80
+  websecure:
+    exposedPort: 443
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: traefik

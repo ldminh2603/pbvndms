@@ -1,0 +1,81 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webcore-backend
+  namespace: webcore
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: webcore-backend
+
+  template:
+    metadata:
+      labels:
+        app: webcore-backend
+
+    spec:
+      # Anh xa hostname Domain Controller sang IP LDAP
+      hostAliases:
+        - ip: "172.68.68.94"
+          hostnames:
+            - "dc01.ad.pbb.local"
+
+      nodeSelector:
+        ingress-node: "true"
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: webcore-backend
+
+      containers:
+        - name: backend
+          image: docker.io/library/webcore-spring-api:local
+          imagePullPolicy: Never
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          envFrom:
+            - configMapRef:
+                name: webcore-backend-config
+            - secretRef:
+                name: webcore-backend-secret
+
+          # Mount chung chi LDAPS vao Backend
+          volumeMounts:
+            - name: ldap-cert
+              mountPath: /app/certs
+              readOnly: true
+
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 30
+
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+
+      # Lay chung chi tu Kubernetes ConfigMap
+      volumes:
+        - name: ldap-cert
+          configMap:
+            name: webcore-ldap-cert

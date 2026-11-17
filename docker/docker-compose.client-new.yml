@@ -1,0 +1,14 @@
+services:
+  webcore-client-new:
+    image: webcore-client-new:local
+    build:
+      context: ../WebCore.ClientNew
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_WEBCORE_WS_URL: "${NEXT_PUBLIC_WEBCORE_WS_URL:-}"
+    ports:
+      - "${WEBCORE_CLIENT_NEW_PORT:-3001}:3001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      WEBCORE_API_URL: "${WEBCORE_API_URL:-http://host.docker.internal:51130}"

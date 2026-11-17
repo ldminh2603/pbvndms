@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: webcore-auth-rewrite
+  namespace: webcore
+spec:
+  replacePathRegex:
+    regex: ^/api/webcore/auth/(login|refresh|me)$
+    replacement: /api/auth/${1}

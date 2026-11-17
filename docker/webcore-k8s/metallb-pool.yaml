@@ -1,0 +1,24 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: webcore-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 172.68.68.83/32
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: webcore-l2
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - webcore-pool
+  interfaces:
+    - ens18
+  nodeSelectors:
+    - matchLabels:
+        kubernetes.io/hostname: k8s-worker1
+    - matchLabels:
+        kubernetes.io/hostname: k8s-worker2

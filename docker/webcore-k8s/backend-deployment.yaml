@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webcore-backend
+  namespace: webcore
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: webcore-backend
+
+  template:
+    metadata:
+      labels:
+        app: webcore-backend
+
+    spec:
+      hostAliases:
+        - ip: "172.68.68.87"
+          hostnames:
+            - "dc1.ad.pbb.local"
+            - "corelocalhostdb"
+            - "corelocalhosts3"
+
+      nodeSelector:
+        ingress-node: "true"
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: webcore-backend
+
+      containers:
+        - name: backend
+          image: docker.io/library/webcore-spring-api:local
+          imagePullPolicy: Never
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -Xms512m
+                -Xmx1200m
+                -XX:+ExitOnOutOfMemoryError
+                -Djavax.net.ssl.trustStore=/app/truststore/webcore-cacerts
+                -Djavax.net.ssl.trustStorePassword=changeit
+                -Djavax.net.debug=ssl,handshake
+            - name: WEBCORE_CLUSTER_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: WEBCORE_CLUSTER_HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+
+          envFrom:
+            - configMapRef:
+                name: webcore-backend-config
+            - secretRef:
+                name: webcore-backend-secret
+
+          volumeMounts:
+            - name: ldap-cert
+              mountPath: /app/certs
+              readOnly: true
+
+            - name: java-truststore
+              mountPath: /app/truststore
+              readOnly: true
+
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 30
+
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+
+      volumes:
+        - name: ldap-cert
+          configMap:
+            name: webcore-ldap-cert
+
+        - name: java-truststore
+          secret:
+            secretName: webcore-java-truststore
