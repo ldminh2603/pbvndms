@@ -1,0 +1,95 @@
+'use client'
+
+import { useState } from 'react'
+import { useTreeviewAnimation } from '../hooks/use-treeview-animation'
+import { useLinkComponent } from '../context/link-context'
+import type { MenuGroup, MenuNode } from '../types/menu'
+import { cn } from '../lib/class-name'
+
+export interface SidebarNavItemProps {
+  item: MenuNode
+  currentPath: string
+  depth?: number
+}
+
+function NavigationIcon({ icon, className }: { icon?: string; className?: string }) {
+  if (!icon) return null
+  if (icon.includes('/assets/winform-theme/')) {
+    return <img
+      className={cn('nav-icon', className)}
+      src={icon}
+      alt=""
+      onError={event => { event.currentTarget.src = icon.replace(/\/16x16\/[^/]+$/, '/16x16/MENU.png') }}
+    />
+  }
+  return <i className={cn('nav-icon bi', icon, className)}></i>
+}
+
+/** Collapsible group — isolated so its hooks are always called unconditionally. */
+function SidebarNavGroup({
+  item,
+  currentPath,
+  depth,
+}: {
+  item: MenuGroup
+  currentPath: string
+  depth: number
+}) {
+  const hasActiveChild = item.children.some(
+    child =>
+      child.type === 'item' &&
+      (currentPath === child.href || currentPath.startsWith(child.href + '/'))
+  )
+  const [isOpen, setIsOpen] = useState(hasActiveChild)
+  const { ref, style } = useTreeviewAnimation(isOpen, 300)
+
+  return (
+    <li className={cn('nav-item', isOpen && 'menu-open')}>
+      <button type="button" className="nav-link" onClick={() => setIsOpen(!isOpen)}>
+        <NavigationIcon icon={item.icon} />
+        <p>
+          {item.text}
+          <i className="nav-arrow bi bi-chevron-right"></i>
+        </p>
+        {item.badge && (
+          <span className={`nav-badge badge text-bg-${item.badgeColor || 'secondary'} ms-auto me-3`}>
+            {item.badge}
+          </span>
+        )}
+      </button>
+
+      <ul ref={ref} style={style} className="nav nav-treeview">
+        {item.children.map((child, idx) => (
+          <SidebarNavItem key={idx} item={child} currentPath={currentPath} depth={depth + 1} />
+        ))}
+      </ul>
+    </li>
+  )
+}
+
+export function SidebarNavItem({ item, currentPath, depth = 0 }: SidebarNavItemProps) {
+  const Link = useLinkComponent()
+
+  if (item.type === 'header') {
+    return <li className="nav-header">{item.text}</li>
+  }
+
+  if (item.type === 'item') {
+    const isActive = currentPath === item.href || currentPath.startsWith(item.href + '/')
+    return (
+      <li className={cn('nav-item', isActive && 'active')}>
+        <Link href={item.href} className={cn('nav-link', isActive && 'active')} target={item.target}>
+          <NavigationIcon icon={item.icon} className={item.iconColor && `text-${item.iconColor}`} />
+          <p>{item.text}</p>
+          {item.badge && (
+            <span className={`nav-badge badge text-bg-${item.badgeColor || 'secondary'} ms-auto`}>
+              {item.badge}
+            </span>
+          )}
+        </Link>
+      </li>
+    )
+  }
+
+  return <SidebarNavGroup item={item} currentPath={currentPath} depth={depth} />
+}

@@ -1,0 +1,121 @@
+server:
+  port: ${WEBCORE_SERVER_PORT:8080}
+
+spring:
+  application:
+    name: webcore-spring-api
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    problemdetails:
+      enabled: true
+  data:
+    redis:
+      # Use an explicit loopback default. On this Windows host `localhost`
+      # resolves to a LAN address while Redis Docker is published on 127.0.0.1.
+      host: ${WEBCORE_REDIS_HOST:127.0.0.1}
+      port: ${WEBCORE_REDIS_PORT:6379}
+      password: ${WEBCORE_REDIS_PASSWORD:}
+  mail:
+    host: ${WEBCORE_SMTP_HOST:}
+    port: ${WEBCORE_SMTP_PORT:587}
+    username: ${WEBCORE_SMTP_USERNAME:}
+    password: ${WEBCORE_SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${WEBCORE_SMTP_AUTH_ENABLED:true}
+      mail.smtp.starttls.enable: ${WEBCORE_SMTP_STARTTLS_ENABLED:true}
+
+# The sole connection configuration for Spring core/base operations.
+# Business sources are loaded separately from core.def_source at runtime.
+Database:
+  Provider: ${WEBCORE_DATABASE_PROVIDER:POSTGRES}
+  ConnectionString: ${WEBCORE_DATABASE_CONNECTION_STRING:}
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  health:
+    # Redis is used as an optional notification fallback. Its absence must not
+    # block login/core APIs, matching the .NET startup gate behavior.
+    redis:
+      enabled: ${WEBCORE_REDIS_HEALTH_ENABLED:false}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+observability:
+  loki:
+    enabled: ${WEBCORE_LOKI_ENABLED:false}
+    endpoint: ${WEBCORE_LOKI_ENDPOINT:http://localhost:3100/loki/api/v1/push}
+    service: ${WEBCORE_LOKI_SERVICE:webcore-spring-api}
+    environment: ${WEBCORE_LOKI_ENVIRONMENT:development}
+
+webcore:
+  cluster:
+    enabled: ${WEBCORE_CLUSTER_ENABLED:false}
+    environment: ${WEBCORE_CLUSTER_ENVIRONMENT:development}
+    service-name: ${WEBCORE_CLUSTER_SERVICE_NAME:webcore-spring-api}
+    instance-id: ${WEBCORE_CLUSTER_INSTANCE_ID:${random.uuid}}
+    host-name: ${WEBCORE_CLUSTER_HOST_NAME:}
+    poll-interval-ms: ${WEBCORE_CLUSTER_POLL_INTERVAL_MS:2000}
+    # Test-only fault injection. Keep empty in normal environments.
+    test-fail-apply-instance-id: ${WEBCORE_CLUSTER_TEST_FAIL_APPLY_INSTANCE_ID:}
+  auth-cookie:
+    secure: ${WEBCORE_AUTH_COOKIE_SECURE:false}
+    same-site: ${WEBCORE_AUTH_COOKIE_SAME_SITE:Lax}
+    path: ${WEBCORE_AUTH_COOKIE_PATH:/}
+  notification:
+    redis-key-prefix: ${WEBCORE_NOTIFICATION_REDIS_KEY_PREFIX:webcore:notification:}
+    realtime-enabled: ${WEBCORE_NOTIFICATION_REALTIME_ENABLED:true}
+    redis-channel: ${WEBCORE_NOTIFICATION_REDIS_CHANNEL:webcore:notification:events}
+  cors:
+    allowed-origins: ${WEBCORE_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:5173}
+  dms:
+    clamav:
+      host: ${WEBCORE_DMS_CLAMAV_HOST:localhost}
+      port: ${WEBCORE_DMS_CLAMAV_PORT:3310}
+      connect-timeout-ms: ${WEBCORE_DMS_CLAMAV_CONNECT_TIMEOUT_MS:3000}
+      read-timeout-ms: ${WEBCORE_DMS_CLAMAV_READ_TIMEOUT_MS:30000}
+  jwt:
+    issuer: ${WEBCORE_JWT_ISSUER:web-core}
+    audience: ${WEBCORE_JWT_AUDIENCE:web-core-client}
+    # RSA keys and optional issuer/audience overrides are read from
+    # core.sys_var / AUTH_SYSTEM, exactly as in the .NET backend.
+    access-token-ttl: ${WEBCORE_JWT_ACCESS_TOKEN_TTL:PT5M}
+    refresh-token-ttl: ${WEBCORE_JWT_REFRESH_TOKEN_TTL:P7D}
+    reverse-proxy-enabled: ${WEBCORE_REVERSE_PROXY_ENABLED:false}
+  oauth:
+    # Must match the public URL used by OAuth clients. Unlike the legacy JWT
+    # issuer, an OAuth Authorization Server issuer must be an absolute URL.
+    issuer: ${WEBCORE_OAUTH_ISSUER:http://localhost:8080}
+  domain-session:
+    service-username: ${WEBCORE_DOMAIN_SERVICE_USERNAME:}
+    service-password: ${WEBCORE_DOMAIN_SERVICE_PASSWORD:}
+    base-dn: ${WEBCORE_DOMAIN_BASE_DN:}
+  password-reset:
+    # Supported values: smtp, ses. Only the selected provider is used.
+    mail-provider: ${WEBCORE_PASSWORD_RESET_MAIL_PROVIDER:smtp}
+    base-url: ${WEBCORE_PASSWORD_RESET_BASE_URL:http://localhost:5173}
+    token-ttl: ${WEBCORE_PASSWORD_RESET_TOKEN_TTL:PT15M}
+    smtp:
+      host: ${WEBCORE_SMTP_HOST:}
+      port: ${WEBCORE_SMTP_PORT:587}
+      username: ${WEBCORE_SMTP_USERNAME:}
+      password: ${WEBCORE_SMTP_PASSWORD:}
+      from: ${WEBCORE_SMTP_FROM:}
+      reply-to: ${WEBCORE_SMTP_REPLY_TO:}
+      starttls-enabled: ${WEBCORE_SMTP_STARTTLS_ENABLED:true}
+    ses:
+      region: ${WEBCORE_SES_REGION:ap-southeast-1}
+      from: ${WEBCORE_SES_FROM:}
+      reply-to: ${WEBCORE_SES_REPLY_TO:}
+      # Leave credentials empty on AWS workloads to use the IAM role/default credential chain.
+      access-key-id: ${WEBCORE_SES_ACCESS_KEY_ID:}
+      secret-access-key: ${WEBCORE_SES_SECRET_ACCESS_KEY:}

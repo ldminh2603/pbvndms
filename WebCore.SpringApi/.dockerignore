@@ -1,0 +1,9 @@
+.git
+.idea
+.mvn
+target
+*.log
+README.md
+docs
+scripts
+certs

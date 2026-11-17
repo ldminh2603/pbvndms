@@ -1,0 +1,123 @@
+{
+  "name": "@adminlte/react",
+  "version": "0.6.1",
+  "description": "AdminLTE 4 React/Next.js component library",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./css": "./dist/css/adminlte.css"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "./dist/css/adminlte.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ColorlibHQ/adminlte-react"
+  },
+  "bugs": {
+    "url": "https://github.com/ColorlibHQ/adminlte-react/issues"
+  },
+  "keywords": [
+    "admin",
+    "dashboard",
+    "template",
+    "react",
+    "next",
+    "bootstrap",
+    "components"
+  ],
+  "scripts": {
+    "build": "tsup && npm run copy-css && npm run fix-dist",
+    "copy-css": "node -e \"const fs=require('fs'); fs.mkdirSync('dist/css',{recursive:true}); fs.copyFileSync('node_modules/admin-lte/dist/css/adminlte.css','dist/css/adminlte.css')\"",
+    "fix-dist": "node fix-dist.js",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src",
+    "cbs": "pnpm --filter adminlte-react-demo dev -p 3001",
+    "cbs:build": "pnpm --filter adminlte-react-demo build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "apexcharts": ">=4.0.0",
+    "flatpickr": ">=4.6.0",
+    "jsvectormap": ">=1.6.0",
+    "next": ">=14.0.0",
+    "quill": ">=2.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "sortablejs": ">=1.15.0",
+    "tabulator-tables": ">=6.0.0",
+    "tom-select": ">=2.3.0"
+  },
+  "peerDependenciesMeta": {
+    "apexcharts": {
+      "optional": true
+    },
+    "flatpickr": {
+      "optional": true
+    },
+    "jsvectormap": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "quill": {
+      "optional": true
+    },
+    "sortablejs": {
+      "optional": true
+    },
+    "tabulator-tables": {
+      "optional": true
+    },
+    "tom-select": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/sortablejs": "^1.15.9",
+    "admin-lte": "^4.8.1",
+    "apexcharts": "^6.10.0",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "flatpickr": "^4.6.13",
+    "jsdom": "^30.0.1",
+    "jsvectormap": "^1.7.0",
+    "next": "^16.3.2",
+    "quill": "^2.0.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sortablejs": "^1.15.7",
+    "tabulator-tables": "^6.5.2",
+    "tom-select": "^2.6.2",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "@adminlte/react": "^0.6.1",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1"
+  }
+}

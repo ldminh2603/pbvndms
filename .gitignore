@@ -1,0 +1,29 @@
+# Java / Maven
+target/
+.mvn/
+secrets/
+
+# Node / Next.js
+node_modules/
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Logs
+Logs/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

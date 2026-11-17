@@ -1,0 +1,26 @@
+{
+  "folders": [
+    { "name": "WebCoreJava (root)", "path": "." },
+    { "name": "WebCore.SpringApi", "path": "WebCore.SpringApi" },
+    { "name": "WebCore.ClientNew", "path": "WebCore.ClientNew" }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/target": true,
+      "**/.next": true,
+      "**/dist": true,
+      "WebCore.SpringApi": true,
+      "WebCore.ClientNew": true
+    },
+    "java.configuration.updateBuildConfiguration": "automatic"
+  },
+  "extensions": {
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "vmware.vscode-spring-boot",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}

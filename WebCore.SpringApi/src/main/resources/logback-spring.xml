@@ -1,0 +1,28 @@
+<configuration>
+    <property name="LOG_DIRECTORY" value="${WEBCORE_LOG_DIRECTORY:-Logs}" />
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="LOKI" class="com.webcore.api.observability.LokiLogAppender">
+        <enabled>${WEBCORE_LOKI_ENABLED:-false}</enabled>
+        <endpoint>${WEBCORE_LOKI_ENDPOINT:-http://localhost:3100/loki/api/v1/push}</endpoint>
+        <service>${WEBCORE_LOKI_SERVICE:-webcore-spring-api}</service>
+        <environment>${WEBCORE_LOKI_ENVIRONMENT:-development}</environment>
+    </appender>
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIRECTORY}/%d{yyyyMMdd}-info.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="INFO_FILE" />
+        <appender-ref ref="LOKI" />
+    </root>
+</configuration>

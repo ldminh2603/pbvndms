@@ -1,0 +1,11 @@
+.next/
+*.log
+node_modules/
+.env
+.env.local
+.DS_Store
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
