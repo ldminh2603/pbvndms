@@ -27,3 +27,8 @@ Logs/
 *.iml
 .DS_Store
 Thumbs.db
+
+# Archives
+*.tar
+*.tar.gz
+*.tgz
